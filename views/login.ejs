@@ -1,0 +1,41 @@
+<div class="row mt-5 ml-0 mr-0">
+  <div class="col-md-6 col-xl-4 col-xs-2 m-auto">
+    <div class="card card-body">
+      <h1 class="text-center mb-3">
+        <b style="color: orange">FreeLunch</b>
+        <br />
+        bot <i style="color: lightblue;" class="fas fa-robot"></i>
+      </h1>
+      <%- include('./partials/messages.ejs') %> 
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="username">Номер студенческого</label>
+          <input
+            type="text"
+            inputmode="numeric" pattern="[0-9]*"
+            id="username"
+            name="username"
+            class="form-control"
+            placeholder="Введите номер студенческого"
+          />
+        </div>
+        <div class="form-group">
+          <label for="pin">PIN</label>
+          <input
+            type="text"
+            inputmode="numeric" pattern="[0-9]*"
+            id="pin"
+            name="pin"
+            class="form-control"
+            placeholder="Введите PIN"
+          />
+        </div>
+        <div class="btn-group w-100" role="group" aria-label="Basic example">
+          <button type="submit" class="btn btn-success">Войти</button>
+          <a href="/list" class="btn btn-secondary">Список</a>
+        </div>
+      </form>
+      <p class="lead mt-4"><i class="fas fa-copyright"></i> Copyright 2020   Pavel Polyakov</p>
+    </div>
+  </div>
+</div>

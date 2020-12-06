@@ -1,0 +1,17 @@
+<h1 class="mt-4">Панель управления</h1>
+<p class="lead mb-3">Добро пожаловать, <%= name %></p>
+<% if (btn_start) { %>
+    <h2 class="mt-4 mb-4"> Статус: Остановлен</h2>
+    <% } else { %>
+        <h2 class="mt-4 mb-4"> Статус: Активен</h2>
+      <% } %>
+<% if (btn_start) { %>
+    <%- include('./partials/btn_start.ejs') %> 
+    <% } else {  %>
+        <%- include('./partials/btn_stop.ejs') %> 
+      <% } %>
+  <div class="btn-group mt-4 w-100" role="group" aria-label="Basic example">
+    <a href="/logout" class="btn btn-secondary">Выйти</a>
+    <a href="/delete" class="btn btn-warning">Удалить аккаунт</a>
+  </div>
+
