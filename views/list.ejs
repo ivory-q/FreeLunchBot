@@ -1,12 +1,11 @@
 <div class="row mt-5 ml-0 mr-0">
   <div class="col-md-6 col-xl-4 col-xs-2 m-auto">
-    <div class="card card-body">
+    <div class="card card-body mb-4">
       <h1 class="text-center mb-3">
         <b style="color: orange">Список</b>
-        <br />
         <a href="/">
           <i
-            style="color: lightblue; position: absolute; left: 35px; top: 30px"
+            style="color: lightblue; position: absolute; left: 30px; top: 25px"
             class="fas fa-arrow-left"
           ></i
         ></a>
@@ -14,15 +13,17 @@
       <table class="table">
         <thead>
           <tr>
+            <th scope="col">№</th>
             <th scope="col">Имя</th>
-            <th scope="col">Номер</th>
           </tr>
         </thead>
         <tbody>
+          <%count=0%>
           <% list.forEach(user => { %>
+            <%count+=1%>
           <tr>
+            <th><%= count %></th>
             <th><%= user.name %></th>
-            <th><%= user.username %></th>
           </tr>
           <% }) %>
         </tbody>

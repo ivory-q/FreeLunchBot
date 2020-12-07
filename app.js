@@ -18,10 +18,10 @@ const app = express();
 require("./config/passport")(passport);
 const db = require("./config/mongo").MongoURI;
 
-process.addListener('unhandledRejection', (e)=> {
-  console.log("UNHANDLED REJECTION")
-  console.log(e)
-})
+process.addListener("unhandledRejection", (e) => {
+  console.log("UNHANDLED REJECTION");
+  console.log(e);
+});
 
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -97,7 +97,12 @@ app.get("/logout", (req, res) => {
   res.redirect("/login");
 });
 
-app.get("/delete", (req, res) => {
+app.get("/delete", async (req, res) => {
+  if (!(await GetBotState(req.user))) {
+    Sub.deleteOne({ username: req.user.username }).catch((err) => {
+      console.log(err);
+    });
+  }
   User.deleteOne({ username: req.user.username }).catch((err) =>
     console.log(err)
   );
@@ -169,13 +174,15 @@ async function Immediate() {
       }
     });
   });
-  console.log("====>> Immediate");
+  console.log("====>> Immediate Subscription");
 }
 
 function MainBot() {
   setTimeout(async () => {
     let subs = await Sub.find({}).catch((err) => console.log(err));
     if (!subs) return;
+    console.log("====>> Timed Subscription");
+    let count = 0;
     subs.forEach((user) => {
       let options = {
         method: "POST",
@@ -188,14 +195,19 @@ function MainBot() {
       request(options, function (error, response) {
         if (error) throw new Error(error);
         const htmlRes = cheerio(response.body);
+        count += 1;
         if (htmlRes.find(".message_ok").text()) {
-          console.log(user.name, "successfully signed on");
+          console.log(`${count}:`, user.name, "successfully signed on");
+        } else {
+          console.log(`${count}:`, user.name, "error");
         }
       });
     });
     MainBot();
   }, 1000 * 60 * 60 * 2);
 }
+// Default time
+// 1000 * 60 * 60 * 2
 
 Immediate();
 MainBot();
