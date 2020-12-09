@@ -116,13 +116,13 @@ app.post("/bot", async (req, res) => {
   res.redirect("/dashboard");
 });
 
-app.get("/list", (req, res) => {
-  Sub.find({}).then((collection) => {
-    res.render("list", {
-      list: collection,
-    });
-  });
-});
+// app.get("/list", (req, res) => {
+//   Sub.find({}).then((collection) => {
+//     res.render("list", {
+//       list: collection,
+//     });
+//   });
+// });
 
 async function GetBotState(user) {
   let res = await Sub.findOne({ username: user.username }).catch((err) =>
@@ -157,6 +157,8 @@ async function ChangeBotState(user) {
 async function Immediate() {
   let subs = await Sub.find({}).catch((err) => console.log(err));
   if (!subs) return;
+  console.log(`====>> Immediate Subscription: ${subs.length}`);
+  let count = 0;
   subs.forEach((user) => {
     let options = {
       method: "POST",
@@ -169,19 +171,21 @@ async function Immediate() {
     request(options, function (error, response) {
       if (error) console.log(new Error(error));
       const htmlRes = cheerio(response.body);
+      count += 1;
       if (htmlRes.find(".message_ok").text()) {
-        console.log(user.name, "successfully signed on");
+        console.log(`${count}:`, user.name, "successfully signed on");
+      } else {
+        console.log(`${count}:`, user.name, "error");
       }
     });
   });
-  console.log("====>> Immediate Subscription");
 }
 
 function MainBot() {
   setTimeout(async () => {
     let subs = await Sub.find({}).catch((err) => console.log(err));
     if (!subs) return;
-    console.log("====>> Timed Subscription");
+    console.log(`====>> Timed Subscription: ${subs.length}`);
     let count = 0;
     subs.forEach((user) => {
       let options = {
