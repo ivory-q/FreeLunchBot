@@ -17,6 +17,7 @@ const app = express();
 
 require("./config/passport")(passport);
 const db = require("./config/mongo").MongoURI;
+const { Console } = require("console");
 
 process.addListener("unhandledRejection", (e) => {
   console.log("UNHANDLED REJECTION");
@@ -116,14 +117,6 @@ app.post("/bot", async (req, res) => {
   res.redirect("/dashboard");
 });
 
-// app.get("/list", (req, res) => {
-//   Sub.find({}).then((collection) => {
-//     res.render("list", {
-//       list: collection,
-//     });
-//   });
-// });
-
 async function GetBotState(user) {
   let res = await Sub.findOne({ username: user.username }).catch((err) =>
     console.log(err)
@@ -172,10 +165,14 @@ async function Immediate() {
       if (error) console.log(new Error(error));
       const htmlRes = cheerio(response.body);
       count += 1;
-      if (htmlRes.find(".message_ok").text()) {
-        console.log(`${count}:`, user.name, "successfully signed on");
-      } else {
-        console.log(`${count}:`, user.name, "error");
+      try {
+        if (htmlRes.find(".message_ok").text()) {
+          console.log(`${count}:`, user.name, "successfully signed on");
+        } else {
+          console.log(`${count}:`, user.name, "error");
+        }
+      } catch (ex) {
+        console.log("server error");
       }
     });
   });
@@ -198,12 +195,16 @@ function MainBot() {
       };
       request(options, function (error, response) {
         if (error) throw new Error(error);
-        const htmlRes = cheerio(response.body);
-        count += 1;
-        if (htmlRes.find(".message_ok").text()) {
-          console.log(`${count}:`, user.name, "successfully signed on");
-        } else {
-          console.log(`${count}:`, user.name, "error");
+        try {
+          const htmlRes = cheerio(response.body);
+          count += 1;
+          if (htmlRes.find(".message_ok").text()) {
+            console.log(`${count}:`, user.name, "successfully signed on");
+          } else {
+            console.log(`${count}:`, user.name, "error");
+          }
+        } catch (ex) {
+          console.log("server error");
         }
       });
     });
@@ -212,6 +213,10 @@ function MainBot() {
 }
 // Default time
 // 1000 * 60 * 60 * 2
+
+app.use(function (req, res, next) {
+  res.status(404).render("404");
+});
 
 Immediate();
 MainBot();
