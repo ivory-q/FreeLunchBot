@@ -5,7 +5,7 @@ const session = require("express-session");
 const passport = require("passport");
 const path = require("path");
 const cheerio = require("cheerio");
-const request = require("request");
+const request = require("request-promise");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const { ensureAuthenticated } = require("./config/auth");
@@ -152,28 +152,42 @@ async function Immediate() {
   if (!subs) return;
   console.log(`====>> Immediate Subscription: ${subs.length}`);
   let count = 0;
+  let cookie;
   subs.forEach((user) => {
-    let options = {
+    request({
       method: "POST",
-      url: "https://bincol.ru/freelunch/index.php",
+      url: "https://bincol.ru/freelunch/pin.php",
+      resolveWithFullResponse: true,
       formData: {
-        login: user.username,
-        pin: user.pin,
+        student_id: user.username,
       },
-    };
-    request(options, function (error, response) {
-      if (error) console.log(new Error(error));
-      const htmlRes = cheerio(response.body);
-      count += 1;
-      try {
-        if (htmlRes.find(".message_ok").text()) {
-          console.log(`${count}:`, user.name, "successfully signed on");
-        } else {
-          console.log(`${count}:`, user.name, "error");
-        }
-      } catch (ex) {
-        console.log("server error");
-      }
+    }).then((res) => {
+      cookie = res.headers["set-cookie"][0].split(" ")[0].replace(";", "");
+      request({
+        method: "POST",
+        url: "https://bincol.ru/freelunch/result.php",
+        formData: {
+          student_id: user.username,
+          student_pin: user.pin,
+        },
+        headers: {
+          Cookie: cookie,
+        },
+      })
+        .then((res) => {
+          const htmlRes = cheerio(res);
+          count += 1;
+          try {
+            if (htmlRes.find(".dear_success").text()) {
+              console.log(`${count}:`, user.name, "successfully signed on");
+            } else {
+              console.log(`${count}:`, user.name, "error");
+            }
+          } catch (ex) {
+            console.log("server error");
+          }
+        })
+        .catch((err) => console.log(err));
     });
   });
 }
@@ -184,28 +198,42 @@ function MainBot() {
     if (!subs) return;
     console.log(`====>> Timed Subscription: ${subs.length}`);
     let count = 0;
+    let cookie;
     subs.forEach((user) => {
-      let options = {
+      request({
         method: "POST",
-        url: "https://bincol.ru/freelunch/index.php",
+        url: "https://bincol.ru/freelunch/pin.php",
+        resolveWithFullResponse: true,
         formData: {
-          login: user.username,
-          pin: user.pin,
+          student_id: user.username,
         },
-      };
-      request(options, function (error, response) {
-        if (error) throw new Error(error);
-        try {
-          const htmlRes = cheerio(response.body);
-          count += 1;
-          if (htmlRes.find(".message_ok").text()) {
-            console.log(`${count}:`, user.name, "successfully signed on");
-          } else {
-            console.log(`${count}:`, user.name, "error");
-          }
-        } catch (ex) {
-          console.log("server error");
-        }
+      }).then((res) => {
+        cookie = res.headers["set-cookie"][0].split(" ")[0].replace(";", "");
+        request({
+          method: "POST",
+          url: "https://bincol.ru/freelunch/result.php",
+          formData: {
+            student_id: user.username,
+            student_pin: user.pin,
+          },
+          headers: {
+            Cookie: cookie,
+          },
+        })
+          .then((res) => {
+            const htmlRes = cheerio(res);
+            count += 1;
+            try {
+              if (htmlRes.find(".dear_success").text()) {
+                console.log(`${count}:`, user.name, "successfully signed on");
+              } else {
+                console.log(`${count}:`, user.name, "error");
+              }
+            } catch (ex) {
+              console.log("server error");
+            }
+          })
+          .catch((err) => console.log(err));
       });
     });
     MainBot();
