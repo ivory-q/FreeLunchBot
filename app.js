@@ -8,12 +8,14 @@ const cheerio = require("cheerio");
 const request = require("request-promise");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
+const compression = require("compression");
 const { ensureAuthenticated } = require("./config/auth");
 
 const User = require("./models/User");
 const Sub = require("./models/Sub");
 
 const app = express();
+app.use(compression());
 
 require("./config/passport")(passport);
 const db = require("./config/mongo").MongoURI;
@@ -29,7 +31,7 @@ mongoose
   .then(() => console.log("MongoDB connected..."))
   .catch((err) => console.log(err));
 
-app.use(favicon(path.join(__dirname, "favicon.ico")));
+app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));
 app.use(express.static(path.join(__dirname, "views")));
 app.use(expressLayouts);
 app.set("view engine", "ejs");
@@ -71,6 +73,10 @@ app.get(
     res.redirect("/login");
   }
 );
+
+app.get("/offline", (req, res) => {
+  res.sendFile(path.join(__dirname, "views", "offline.html"));
+});
 
 app.get("/dashboard", ensureAuthenticated, async (req, res) => {
   let state = await GetBotState(req.user);
