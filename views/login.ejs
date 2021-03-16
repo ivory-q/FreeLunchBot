@@ -1,19 +1,41 @@
+<head>
+  <link rel="stylesheet" href="./modal.css" />
+</head>
+<!-- The Modal -->
+<div id="myModal" class="modal">
+  <!-- Modal content -->
+  <div class="card card-body modal-content col-md-6 col-xl-4 col-xs-2 m-auto">
+    <div class="modal-header text-center mb-3">
+      <span class="close" style="font-size: 34px; cursor: pointer"
+        >&times;</span
+      >
+      <h2>Что такое FreeLunchBot ?</h2>
+    </div>
+    <div class="modal-body text-left">
+      <p>
+        FreeLunchBot - это бот для автоматической ежедневной записи студентов на
+        обед через сервис FreeLunch
+      </p>
+    </div>
+  </div>
+</div>
 <div class="row mt-5 ml-0 mr-0">
   <div class="col-md-6 col-xl-4 col-xs-2 m-auto">
     <div class="card card-body">
       <h1 class="text-center mb-3">
         <b style="color: orange">FreeLunch</b>
         <br />
-        bot <i style="color: lightblue;" class="fas fa-robot"></i>
+        bot <i style="color: lightblue" class="fas fa-robot"></i>
       </h1>
-      <%- include('./partials/messages.ejs') %> 
+      <%- include('./partials/messages.ejs') %>
       <form action="/login" method="POST">
         <div class="form-group">
           <label for="username">Номер студенческого</label>
           <input
             autocomplete="off"
             type="text"
-            inputmode="numeric" pattern="[0-9]*"
+            inputmode="numeric"
+            pattern="[0-9]*"
             id="username"
             name="username"
             class="form-control"
@@ -25,7 +47,8 @@
           <input
             autocomplete="off"
             type="text"
-            inputmode="numeric" pattern="[0-9]*"
+            inputmode="numeric"
+            pattern="[0-9]*"
             id="pin"
             name="pin"
             class="form-control"
@@ -36,7 +59,48 @@
           <button type="submit" class="btn btn-success">Войти</button>
         </div>
       </form>
-      <p class="lead mt-4"><i class="fas fa-copyright"></i> Copyright 2020   Pavel Polyakov</p>
+      <p class="lead mt-4">
+        <i class="fas fa-copyright"></i> Copyright 2021
+        <a href="https://vk.com/pavel.poly" target="_blank"> Pavel Polyakov</a>
+      </p>
+      <div class="btn-group">
+        <button id="openModal" class="btn">
+          <i class="fas fa-2x fa-info-circle"></i>
+        </button>
+        <a
+          href="http://vk.com/share.php?url=http://freelunchbot.herokuapp.com"
+          target="_blank"
+          class="btn"
+          ><i class="fas fa-2x fa-share-square"></i
+        ></a>
+      </div>
     </div>
   </div>
 </div>
+<script>
+  // Get the modal
+  let modal = document.getElementById("myModal");
+
+  // Get the button that opens the modal
+  let btn = document.getElementById("openModal");
+
+  // Get the <span> element that closes the modal
+  let span = document.getElementsByClassName("close")[0];
+
+  // When the user clicks the button, open the modal
+  btn.onclick = function () {
+    modal.style.display = "block";
+  };
+
+  // When the user clicks on <span> (x), close the modal
+  span.onclick = function () {
+    modal.style.display = "none";
+  };
+
+  // When the user clicks anywhere outside of the modal, close it
+  window.onclick = function (event) {
+    if (event.target == modal) {
+      modal.style.display = "none";
+    }
+  };
+</script>

@@ -1,9 +1,9 @@
+const path = require("path");
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
-const flash = require("connect-flash");
 const session = require("express-session");
+const flash = require("connect-flash");
 const passport = require("passport");
-const path = require("path");
 const cheerio = require("cheerio");
 const request = require("request-promise");
 const favicon = require("serve-favicon");
@@ -19,7 +19,6 @@ app.use(compression());
 
 require("./config/passport")(passport);
 const db = require("./config/mongo").MongoURI;
-const { Console } = require("console");
 
 process.addListener("unhandledRejection", (e) => {
   console.log("UNHANDLED REJECTION");
@@ -185,9 +184,9 @@ async function Immediate() {
           count += 1;
           try {
             if (htmlRes.find(".dear_success").text()) {
-              console.log(`${count}:`, user.name, "successfully signed on");
+              console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
             } else {
-              console.log(`${count}:`, user.name, "error");
+              console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
             }
           } catch (ex) {
             console.log("server error");
@@ -231,9 +230,9 @@ function MainBot() {
             count += 1;
             try {
               if (htmlRes.find(".dear_success").text()) {
-                console.log(`${count}:`, user.name, "successfully signed on");
+                console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
               } else {
-                console.log(`${count}:`, user.name, "error");
+                console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
               }
             } catch (ex) {
               console.log("server error");
