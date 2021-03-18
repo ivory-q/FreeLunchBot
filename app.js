@@ -1,17 +1,24 @@
 const path = require("path");
+const flash = require("connect-flash");
 const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
-const flash = require("connect-flash");
 const passport = require("passport");
 const cheerio = require("cheerio");
-const request = require("request-promise");
+const fetch = require("node-fetch");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const compression = require("compression");
-const { ensureAuthenticated } = require("./config/auth");
-
-const User = require("./models/User");
+const { asyncQueue } = require("./taskQueue");
+//Routes
+const index = require("./routes/index");
+const offline = require("./routes/offline");
+const login = require("./routes/login");
+const logout = require("./routes/logout");
+const deleteUsr = require("./routes/delete");
+const dashboard = require("./routes/dashboard");
+const bot = require("./routes/bot");
+//Models
 const Sub = require("./models/Sub");
 
 const app = express();
@@ -25,9 +32,12 @@ process.addListener("unhandledRejection", (e) => {
   console.log(e);
 });
 
+const queue = asyncQueue((concurrency = 20));
+
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected..."))
+  .then(MainBot("Immediate"))
   .catch((err) => console.log(err));
 
 app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));
@@ -58,201 +68,65 @@ app.use((req, res, next) => {
   next();
 });
 
-//routes
-app.get(
-  "/",
-  (req, res, next) => {
-    if (req.isAuthenticated()) {
-      res.redirect("/dashboard");
-    } else {
-      next();
-    }
-  },
-  (req, res) => {
-    res.redirect("/login");
-  }
-);
-
-app.get("/offline", (req, res) => {
-  res.sendFile(path.join(__dirname, "views", "offline.html"));
-});
-
-app.get("/dashboard", ensureAuthenticated, async (req, res) => {
-  let state = await GetBotState(req.user);
-  res.render("dashboard", {
-    name: req.user.name,
-    btn_start: state,
-  });
-});
-
-app.get("/login", (req, res) => {
-  res.render("login");
-});
-
-app.post("/login", (req, res, next) => {
-  passport.authenticate("local", {
-    successRedirect: "/dashboard",
-    failureRedirect: "/login",
-    failureFlash: true,
-  })(req, res, next);
-});
-
-app.get("/logout", (req, res) => {
-  req.logout();
-  req.flash("success_msg", "Вы вышли");
-  res.redirect("/login");
-});
-
-app.get("/delete", async (req, res) => {
-  if (!(await GetBotState(req.user))) {
-    Sub.deleteOne({ username: req.user.username }).catch((err) => {
-      console.log(err);
-    });
-  }
-  User.deleteOne({ username: req.user.username }).catch((err) =>
-    console.log(err)
-  );
-  req.logout();
-  req.flash("success_msg", "Аккаунт успешно удален");
-  res.redirect("/login");
-});
-
-app.post("/bot", async (req, res) => {
-  await ChangeBotState(req.user);
-  res.redirect("/dashboard");
-});
-
-async function GetBotState(user) {
-  let res = await Sub.findOne({ username: user.username }).catch((err) =>
-    console.log(err)
-  );
-  if (res === null) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
-async function ChangeBotState(user) {
-  let res = await Sub.findOne({ username: user.username }).catch((err) =>
-    console.log(err)
-  );
-  if (res) {
-    await Sub.deleteOne({ username: user.username }).catch((err) =>
-      console.log(err)
-    );
-  } else {
-    const newSub = new Sub({
-      name: user.name,
-      username: user.username,
-      pin: user.pin,
-      date: Date(Date.now()),
-    });
-    await newSub.save().catch((err) => console.log(err));
-  }
-}
-
-async function Immediate() {
-  let subs = await Sub.find({}).catch((err) => console.log(err));
-  if (!subs) return;
-  console.log(`====>> Immediate Subscription: ${subs.length}`);
-  let count = 0;
-  let cookie;
-  subs.forEach((user) => {
-    request({
-      method: "POST",
-      url: "https://bincol.ru/freelunch/pin.php",
-      resolveWithFullResponse: true,
-      formData: {
-        student_id: user.username,
-      },
-    }).then((res) => {
-      cookie = res.headers["set-cookie"][0].split(" ")[0].replace(";", "");
-      request({
-        method: "POST",
-        url: "https://bincol.ru/freelunch/result.php",
-        formData: {
-          student_id: user.username,
-          student_pin: user.pin,
-        },
-        headers: {
-          Cookie: cookie,
-        },
-      })
-        .then((res) => {
-          const htmlRes = cheerio(res);
-          count += 1;
-          try {
-            if (htmlRes.find(".dear_success").text()) {
-              console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
-            } else {
-              console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
-            }
-          } catch (ex) {
-            console.log("server error");
-          }
-        })
-        .catch((err) => console.log(err));
-    });
-  });
-}
-
-function MainBot() {
-  setTimeout(async () => {
-    let subs = await Sub.find({}).catch((err) => console.log(err));
-    if (!subs) return;
-    console.log(`====>> Timed Subscription: ${subs.length}`);
-    let count = 0;
-    let cookie;
-    subs.forEach((user) => {
-      request({
-        method: "POST",
-        url: "https://bincol.ru/freelunch/pin.php",
-        resolveWithFullResponse: true,
-        formData: {
-          student_id: user.username,
-        },
-      }).then((res) => {
-        cookie = res.headers["set-cookie"][0].split(" ")[0].replace(";", "");
-        request({
-          method: "POST",
-          url: "https://bincol.ru/freelunch/result.php",
-          formData: {
-            student_id: user.username,
-            student_pin: user.pin,
-          },
-          headers: {
-            Cookie: cookie,
-          },
-        })
-          .then((res) => {
-            const htmlRes = cheerio(res);
-            count += 1;
-            try {
-              if (htmlRes.find(".dear_success").text()) {
-                console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
-              } else {
-                console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
-              }
-            } catch (ex) {
-              console.log("server error");
-            }
-          })
-          .catch((err) => console.log(err));
-      });
-    });
-    MainBot();
-  }, 1000 * 60 * 60 * 2);
-}
-// Default time
-// 1000 * 60 * 60 * 2
-
+//Routes
+app.use("/", index);
+app.use("/offline", offline);
+app.use("/dashboard", dashboard);
+app.use("/login", login);
+app.use("/logout", logout);
+app.use("/delete", deleteUsr);
+app.use("/bot", bot);
 app.use(function (req, res, next) {
   res.status(404).render("404");
 });
 
-Immediate();
-MainBot();
+async function MainBot(typestr) {
+  let subs = await Sub.find({});
+  if (!subs) return;
+  let count = 1;
+  console.log(`\x1b[33m====>> ${typestr} Subscription: ${subs.length}\x1b[0m`);
+
+  subs.forEach((user) => {
+    queue.push(async (done) => {
+      let params = new URLSearchParams();
+      params.append("student_id", user.username);
+      let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
+        method: "POST",
+        body: params,
+      });
+      let cookie = response.headers.raw()["set-cookie"][0].split(";")[0];
+
+      params.append("student_pin", user.pin);
+      response = await fetch("https://bincol.ru/freelunch/result.php/", {
+        method: "POST",
+        body: params,
+        headers: { Cookie: cookie },
+      });
+
+      const body = await response.text();
+      const htmlRes = cheerio.load(body);
+
+      try {
+        if (htmlRes(".dear_success").text()) {
+          console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
+        } else {
+          console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
+        }
+        count += 1;
+      } catch (ex) {
+        console.log("server error");
+      }
+      done();
+    });
+  });
+}
+
+setInterval(() => {
+  MainBot("Timed");
+}, 1000 * 60 * 60 * 2);
+// Default time
+// 1000 * 60 * 60 * 2
+
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => console.log(`Server started on port ${PORT}`));
