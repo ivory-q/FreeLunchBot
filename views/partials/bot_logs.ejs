@@ -1,0 +1,45 @@
+<style>
+  .log-container {
+    flex-direction: column;
+    margin-top: 20px;
+    margin-bottom: 50px;
+  }
+
+  .log-group {
+    margin-bottom: 20px;
+  }
+
+  .log-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    font-size: 12pt;
+    border-bottom: 1px dashed grey;
+  }
+
+  .date-target {
+    margin-bottom: 10px;
+  }
+
+  .success {
+    color: rgb(0, 165, 0);
+  }
+</style>
+
+<h2 class="mt-4" id="logs-header">Логи:</h2>
+<div class="flex-container log-container">
+  <% logsGroups.forEach((logsGroup) => { %>
+  <div class="log-group">
+    <p class="date-target lead"><%=logsGroup._id%></p>
+
+    <% logsGroup.logs.forEach(log => { %>
+    <p class="log-item">
+      <span class="date-time"><%=log.date%> <%= log.time%></span>
+      <span class="info"
+        ><b><%=log.msg%></b> <b class="success">успешно</b> записаны</span
+      >
+    </p>
+    <% }) %>
+  </div>
+  <% }) %>
+</div>

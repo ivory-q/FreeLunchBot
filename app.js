@@ -10,6 +10,7 @@ const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const compression = require("compression");
 const { asyncQueue } = require("./taskQueue");
+const { logger } = require("./logger");
 //Routes
 const index = require("./routes/index");
 const offline = require("./routes/offline");
@@ -84,6 +85,7 @@ async function MainBot(typestr) {
   let subs = await Sub.find({});
   if (!subs) return;
   let count = 1;
+  let success = 0;
   console.log(`\x1b[33m====>> ${typestr} Subscription: ${subs.length}\x1b[0m`);
 
   subs.forEach((user) => {
@@ -94,6 +96,7 @@ async function MainBot(typestr) {
         method: "POST",
         body: params,
       });
+
       let cookie = response.headers.raw()["set-cookie"][0].split(";")[0];
 
       params.append("student_pin", user.pin);
@@ -109,6 +112,7 @@ async function MainBot(typestr) {
       try {
         if (htmlRes(".dear_success").text()) {
           console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
+          success++;
         } else {
           console.log(`${count} \x1b[31mError\x1b[0m:`, user.name);
         }
@@ -118,6 +122,10 @@ async function MainBot(typestr) {
       }
       done();
     });
+  });
+  queue.pushAfter((done) => {
+    logger(success);
+    done();
   });
 }
 

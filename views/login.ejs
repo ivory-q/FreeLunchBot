@@ -1,6 +1,23 @@
 <head>
-  <link rel="stylesheet" href="./modal.css" />
+  <link rel="stylesheet" href="./styles/modal.css" />
+  <link rel="stylesheet" href="./styles/fontawesome/css/fontawesome.min.css">
 </head>
+<style>
+  .flex-container {
+    font-size: 12pt;
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 100%;
+    background-color: greenyellow;
+  }
+</style>
 <!-- The Modal -->
 <div id="myModal" class="modal">
   <!-- Modal content -->
@@ -19,7 +36,7 @@
     </div>
   </div>
 </div>
-<div class="row mt-5 ml-0 mr-0">
+<div class="row mt-2 ml-0 mr-0">
   <div class="col-md-6 col-xl-4 col-xs-2 m-auto">
     <div class="card card-body">
       <h1 class="text-center mb-3">
@@ -59,7 +76,14 @@
           <button type="submit" class="btn btn-success">Войти</button>
         </div>
       </form>
-      <p class="lead mt-4">
+      <div class="flex-container">
+        <span>Статус:</span>
+        <div>
+          <div class="indicator"></div>
+          <a href="#logs-header">Online</a>
+        </div>
+      </div>
+      <p class="lead mt-2">
         <i class="fas fa-copyright"></i> Copyright 2021
         <a href="https://vk.com/pavel.poly" target="_blank"> Pavel Polyakov</a>
       </p>
@@ -67,6 +91,8 @@
         <i class="fas fa-2x fa-info-circle"></i>
       </button>
     </div>
+
+    <%- include('./partials/bot_logs.ejs', {logsGroups: logsGroups}) %>
   </div>
 </div>
 <script>
@@ -96,3 +122,4 @@
     }
   };
 </script>
+
