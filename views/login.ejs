@@ -1,6 +1,6 @@
 <head>
   <link rel="stylesheet" href="./styles/modal.css" />
-  <link rel="stylesheet" href="./styles/fontawesome/css/fontawesome.min.css">
+  <link rel="stylesheet" href="./styles/fontawesome/css/fontawesome.min.css" />
 </head>
 <style>
   .flex-container {
@@ -22,17 +22,22 @@
 <div id="myModal" class="modal">
   <!-- Modal content -->
   <div class="card card-body modal-content col-md-6 col-xl-4 col-xs-2 m-auto">
-    <div class="modal-header text-center mb-3">
-      <span class="close" style="font-size: 34px; cursor: pointer"
-        >&times;</span
-      >
-      <h2>Что такое FreeLunchBot ?</h2>
+    <div style="display: none" id="monke">
+      <img src="./img/monke.png" alt="monke" style="width: 100%" />
     </div>
-    <div class="modal-body text-left">
-      <p>
-        FreeLunchBot - это бот для автоматической ежедневной записи студентов на
-        обед через сервис FreeLunch
-      </p>
+    <div id="mainModal">
+      <div class="modal-header text-center mb-3">
+        <span class="close" style="font-size: 34px; cursor: pointer"
+          >&times;</span
+        >
+        <h2>Что такое FreeLunchBot ?</h2>
+      </div>
+      <div class="modal-body text-left">
+        <p>
+          FreeLunchBot - это бот для автоматической ежедневной записи студентов
+          на обед через сервис FreeLunch
+        </p>
+      </div>
     </div>
   </div>
 </div>
@@ -96,6 +101,11 @@
   </div>
 </div>
 <script>
+  let clicks = 0;
+
+  let monke = document.getElementById("monke");
+  let mainModal = document.getElementById("mainModal");
+
   // Get the modal
   let modal = document.getElementById("myModal");
 
@@ -107,19 +117,33 @@
 
   // When the user clicks the button, open the modal
   btn.onclick = function () {
+    console.log(clicks);
+    clicks++;
+    if (clicks >= 5) {
+      mainModal.style.display = "none";
+      monke.style.display = "block";
+      clicks = 0;
+    }
     modal.style.display = "block";
   };
 
   // When the user clicks on <span> (x), close the modal
   span.onclick = function () {
+    if (clicks <= 5) {
+      mainModal.style.display = "block";
+      monke.style.display = "none";
+    }
     modal.style.display = "none";
   };
 
   // When the user clicks anywhere outside of the modal, close it
   window.onclick = function (event) {
     if (event.target == modal) {
+      if (clicks <= 5) {
+        mainModal.style.display = "block";
+        monke.style.display = "none";
+      }
       modal.style.display = "none";
     }
   };
 </script>
-

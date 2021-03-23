@@ -38,7 +38,7 @@ const queue = asyncQueue((concurrency = 20));
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected..."))
-  .then(MainBot("Immediate"))
+  // .then(MainBot("Immediate")) 
   .catch((err) => console.log(err));
 
 app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));
@@ -129,9 +129,9 @@ async function MainBot(typestr) {
   });
 }
 
-setInterval(() => {
-  MainBot("Timed");
-}, 1000 * 60 * 60 * 2);
+// setInterval(() => {
+//   MainBot("Timed");
+// }, 1000 * 60 * 60 * 2);
 // Default time
 // 1000 * 60 * 60 * 2
 
