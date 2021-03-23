@@ -30,7 +30,7 @@ module.exports = {
         .split(String.fromCharCode(160))[1]
         .split(".");
       let time = new Date();
-      let formattedTime = `${time.getHours()}:${
+      let formattedTime = `${time.getHours() + 3}:${
         (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
       }`;
       const newLog = new Log({
