@@ -38,7 +38,7 @@ const queue = asyncQueue((concurrency = 20));
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected..."))
-  .then(MainBot("Immediate"))
+  .then(MainBot("Immediate")) 
   .catch((err) => console.log(err));
 
 app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));

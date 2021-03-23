@@ -10,6 +10,7 @@ const precacheFiles = [
   "./styles/fontawesome/webfonts/fa-solid-900.ttf",
   "./styles/fontawesome/webfonts/fa-solid-900.woff",
   "./styles/fontawesome/webfonts/fa-solid-900.woff2",
+  "./img/monke.png",
 ];
 
 self.addEventListener("install", (e) => {
