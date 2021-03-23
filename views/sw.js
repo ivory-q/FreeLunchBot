@@ -1,6 +1,16 @@
 const precacheVersion = 1;
 const precacheName = "precache-v" + precacheVersion;
-const precacheFiles = ["/offline.html", "/style.min.css"];
+const precacheFiles = [
+  "/offline.html",
+  "./styles/style.min.css",
+  "./styles/modal.css",
+  "./styles/fontawesome/css/fontawesome.min.css",
+  "./styles/fontawesome/webfonts/fa-solid-900.eot",
+  "./styles/fontawesome/webfonts/fa-solid-900.svg",
+  "./styles/fontawesome/webfonts/fa-solid-900.ttf",
+  "./styles/fontawesome/webfonts/fa-solid-900.woff",
+  "./styles/fontawesome/webfonts/fa-solid-900.woff2",
+];
 
 self.addEventListener("install", (e) => {
   console.log("[ServiceWorker] Installed");
