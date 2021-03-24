@@ -2,10 +2,14 @@ const mongoose = require("mongoose");
 
 const LogSchema = new mongoose.Schema(
   {
+    date: {
+      type: Date,
+      default: Date(Date.now()),
+    },
     dateTarget: {
       type: String,
     },
-    date: {
+    dateFormatted: {
       type: String,
     },
     time: {

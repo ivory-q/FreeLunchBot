@@ -5,21 +5,23 @@ const passport = require("passport");
 const Log = require("../models/Log");
 
 async function getLogs() {
-  const logsGroups = await Log.aggregate([
+  let logsGroups = await Log.aggregate([
+    { $sort: { date: -1 } },
     {
       $group: {
         _id: "$dateTarget",
-        count: { $sum: 1 },
+        date: { $max: "$date" },
         logs: {
           $push: {
             dateTarget: "$dateTarget",
-            date: "$date",
+            date: "$dateFormatted",
             time: "$time",
             msg: "$msg",
           },
         },
       },
     },
+    { $sort: { date: -1 } },
   ]);
 
   return logsGroups;

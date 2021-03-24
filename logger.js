@@ -35,7 +35,7 @@ module.exports = {
       }`;
       const newLog = new Log({
         dateTarget: `${dateTarget[0]} ${months[+dateTarget[1] - 1]}`,
-        date:
+        dateFormatted:
           (time.getDate() < 10 ? "0" : "") +
           time.getDate() +
           "." +
