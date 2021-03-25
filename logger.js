@@ -22,19 +22,16 @@ module.exports = {
     let nexLunchDate = await GetNextLunchDate();
     if (nexLunchDate) {
       let dateTarget = nexLunchDate.split(".");
-      let time = new Date();
-      let formattedTime = `${time.getHours() + 3}:${
-        (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()
-      }`;
+      let time = new Date().toLocaleString("ru-RU", {
+        timezone: "Europe/Moscow",
+      });
+      let currentDate = time.split(",")[0].slice(0, 5);
+      let currentTime = time.split(",")[1].trimLeft().slice(0, 5);
+
       const newLog = new Log({
         dateTarget: `${dateTarget[0]} ${months[+dateTarget[1] - 1]}`,
-        dateFormatted:
-          (time.getDate() < 10 ? "0" : "") +
-          time.getDate() +
-          "." +
-          (time.getMonth() < 10 ? "0" : "") +
-          (time.getMonth() + 1),
-        time: formattedTime,
+        dateFormatted: currentDate,
+        time: currentTime,
         msg: msg,
       });
 
