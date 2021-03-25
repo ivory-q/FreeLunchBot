@@ -1,6 +1,7 @@
 const LocalStrategy = require("passport-local").Strategy;
 const cheerio = require("cheerio");
 const fetch = require("node-fetch");
+const { GetNextLunchDate } = require("../functions");
 
 const User = require("../models/User");
 
@@ -11,12 +12,37 @@ module.exports = (passport) => {
       async (username, pin, done) => {
         let user = await User.findOne({ username: username });
         if (!user) {
+          let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
+          let date = await GetNextLunchDate();
           let params = new URLSearchParams();
+          params.append("secret", secret);
+          params.append("studentID", username);
+          params.append("date", date);
+
+          let response = await fetch(
+            "https://bincol.ru/freelunch/api/register/",
+            {
+              method: "POST",
+              body: params,
+            }
+          );
+
+          response = await fetch(
+            "https://bincol.ru/freelunch/api/checkLunch/",
+            {
+              method: "POST",
+              body: params,
+            }
+          );
+          let status = await response.json();
+
+          params = new URLSearchParams();
           params.append("student_id", username);
-          let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
+          response = await fetch("https://bincol.ru/freelunch/pin.php/", {
             method: "POST",
             body: params,
           });
+
           let cookie = response.headers.raw()["set-cookie"][0].split(";")[0];
 
           params.append("student_pin", pin);
@@ -30,7 +56,7 @@ module.exports = (passport) => {
           const htmlRes = cheerio.load(body);
 
           try {
-            if (htmlRes(".dear_success").text()) {
+            if (status.status && htmlRes(".dear_success").text()) {
               const newUser = new User({
                 name: htmlRes(".dear_success").text().trim().replace(",", ""),
                 username: username,
