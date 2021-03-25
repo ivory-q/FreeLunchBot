@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 
+const Sub = require("../models/Sub");
 const Log = require("../models/Log");
 
 async function getLogs() {
@@ -30,7 +31,7 @@ async function getLogs() {
 router
   .route("/")
   .get(async (req, res) => {
-    res.render("login", { logsGroups: await getLogs() });
+    res.render("login", { logsGroups: await getLogs(), amountUsers: await Sub.count({}) });
   })
   .post((req, res, next) => {
     passport.authenticate("local", {
