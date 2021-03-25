@@ -21,6 +21,7 @@ const dashboard = require("./routes/dashboard");
 const bot = require("./routes/bot");
 //Models
 const Sub = require("./models/Sub");
+const Log = require("./models/Log");
 
 const app = express();
 app.use(compression());
@@ -82,6 +83,14 @@ app.use(function (req, res, next) {
 });
 
 async function MainBot(typestr) {
+  let lastSubscription = await Log.find({}).sort({ date: -1 }).limit(1);
+  let timeDiff = (Date.now() - lastSubscription[0].date) / 3600000;
+
+  console.log(`\x1b[33m Last Subscription ${timeDiff.toFixed(2)}h ago\x1b[0m`);
+  if (timeDiff < 2.5) {
+    return;
+  }
+
   let subs = await Sub.find({});
   if (!subs) return;
   let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
@@ -130,7 +139,7 @@ async function MainBot(typestr) {
 
 setInterval(() => {
   MainBot("Timed");
-}, 1000 * 60 * 60 * 2);
+}, 1000 * 60 * 60 * 3);
 // Default time
 // 1000 * 60 * 60 * 2
 
