@@ -84,11 +84,14 @@ app.use(function (req, res, next) {
 
 async function MainBot(typestr) {
   let lastSubscription = await Log.find({}).sort({ date: -1 }).limit(1);
-  let timeDiff = (Date.now() - lastSubscription[0].date) / 3600000;
-
-  console.log(`\x1b[33m Last Subscription ${timeDiff.toFixed(2)}h ago\x1b[0m`);
-  if (timeDiff < 2.5) {
-    return;
+  if (lastSubscription) {
+    let timeDiff = (Date.now() - lastSubscription[0].date) / 3600000;
+    console.log(
+      `\x1b[33m Last Subscription ${timeDiff.toFixed(2)}h ago\x1b[0m`
+    );
+    if (timeDiff < 2.5) {
+      return;
+    }
   }
 
   let subs = await Sub.find({});
