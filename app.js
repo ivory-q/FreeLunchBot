@@ -4,13 +4,13 @@ const express = require("express");
 const expressLayouts = require("express-ejs-layouts");
 const session = require("express-session");
 const passport = require("passport");
-const cheerio = require("cheerio");
 const fetch = require("node-fetch");
 const favicon = require("serve-favicon");
 const mongoose = require("mongoose");
 const compression = require("compression");
 const { asyncQueue } = require("./taskQueue");
 const { logger } = require("./logger");
+const { GetNextLunchDate } = require("./functions");
 //Routes
 const index = require("./routes/index");
 const offline = require("./routes/offline");
@@ -38,7 +38,7 @@ const queue = asyncQueue((concurrency = 20));
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected..."))
-  // .then(MainBot("Immediate")) 
+  .then(MainBot("Immediate"))
   .catch((err) => console.log(err));
 
 app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));
@@ -84,6 +84,8 @@ app.use(function (req, res, next) {
 async function MainBot(typestr) {
   let subs = await Sub.find({});
   if (!subs) return;
+  let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
+  let date = await GetNextLunchDate();
   let count = 1;
   let success = 0;
   console.log(`\x1b[33m====>> ${typestr} Subscription: ${subs.length}\x1b[0m`);
@@ -91,26 +93,23 @@ async function MainBot(typestr) {
   subs.forEach((user) => {
     queue.push(async (done) => {
       let params = new URLSearchParams();
-      params.append("student_id", user.username);
-      let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
+      params.append("secret", secret);
+      params.append("studentID", user.username);
+      params.append("date", date);
+
+      let response = await fetch("https://bincol.ru/freelunch/api/register/", {
         method: "POST",
         body: params,
       });
 
-      let cookie = response.headers.raw()["set-cookie"][0].split(";")[0];
-
-      params.append("student_pin", user.pin);
-      response = await fetch("https://bincol.ru/freelunch/result.php/", {
+      response = await fetch("https://bincol.ru/freelunch/api/checkLunch/", {
         method: "POST",
         body: params,
-        headers: { Cookie: cookie },
       });
-
-      const body = await response.text();
-      const htmlRes = cheerio.load(body);
+      let res = await response.json();
 
       try {
-        if (htmlRes(".dear_success").text()) {
+        if (res.status) {
           console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
           success++;
         } else {
@@ -123,15 +122,15 @@ async function MainBot(typestr) {
       done();
     });
   });
-  // queue.pushAfter((done) => {
-  //   logger(success);
-  //   done();
-  // });
+  queue.pushAfter((done) => {
+    logger(success);
+    done();
+  });
 }
 
-// setInterval(() => {
-//   MainBot("Timed");
-// }, 1000 * 60 * 60 * 2);
+setInterval(() => {
+  MainBot("Timed");
+}, 1000 * 60 * 60 * 2);
 // Default time
 // 1000 * 60 * 60 * 2
 

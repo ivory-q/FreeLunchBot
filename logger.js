@@ -1,5 +1,5 @@
-const cheerio = require("cheerio");
-const fetch = require("node-fetch");
+const { GetNextLunchDate } = require("./functions");
+
 const Log = require("./models/Log");
 
 let months = [
@@ -19,16 +19,9 @@ let months = [
 
 module.exports = {
   logger: async (msg) => {
-    let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
-      method: "POST",
-    });
-    const body = await response.text();
-    const htmlRes = cheerio.load(body);
-    if (htmlRes(".date_lunch")) {
-      let dateTarget = htmlRes(".date_lunch")
-        .text()
-        .split(String.fromCharCode(160))[1]
-        .split(".");
+    let nexLunchDate = await GetNextLunchDate();
+    if (nexLunchDate) {
+      let dateTarget = nexLunchDate.split(".");
       let time = new Date();
       let formattedTime = `${time.getHours() + 3}:${
         (time.getMinutes() < 10 ? "0" : "") + time.getMinutes()

@@ -1,3 +1,6 @@
+const cheerio = require("cheerio");
+const fetch = require("node-fetch");
+
 const Sub = require("./models/Sub");
 
 module.exports = {
@@ -27,6 +30,19 @@ module.exports = {
         date: Date(Date.now()),
       });
       await newSub.save().catch((err) => console.log(err));
+    }
+  },
+  GetNextLunchDate: async () => {
+    let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
+      method: "POST",
+    });
+    const body = await response.text();
+    const htmlRes = cheerio.load(body);
+    if (htmlRes(".date_lunch")) {
+      let dateTarget = htmlRes(".date_lunch")
+        .text()
+        .split(String.fromCharCode(160))[1];
+      return dateTarget;
     }
   },
 };
