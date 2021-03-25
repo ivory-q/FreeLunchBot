@@ -84,7 +84,7 @@ app.use(function (req, res, next) {
 
 async function MainBot(typestr) {
   let lastSubscription = await Log.find({}).sort({ date: -1 }).limit(1);
-  if (lastSubscription) {
+  if (lastSubscription.length > 0) {
     let timeDiff = (Date.now() - lastSubscription[0].date) / 3600000;
     console.log(
       `\x1b[33m Last Subscription ${timeDiff.toFixed(2)}h ago\x1b[0m`
@@ -93,7 +93,7 @@ async function MainBot(typestr) {
       return;
     }
   }
-
+  
   let subs = await Sub.find({});
   if (!subs) return;
   let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
