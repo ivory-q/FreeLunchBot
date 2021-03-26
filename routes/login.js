@@ -31,7 +31,7 @@ async function getLogs() {
 router
   .route("/")
   .get(async (req, res) => {
-    res.render("login", { logsGroups: await getLogs(), amountUsers: await Sub.count({}) });
+    res.render("login", { logsGroups: await getLogs(), amountUsers: await Sub.countDocuments({}) });
   })
   .post((req, res, next) => {
     passport.authenticate("local", {
