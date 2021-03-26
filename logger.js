@@ -22,11 +22,13 @@ module.exports = {
     let nexLunchDate = await GetNextLunchDate();
     if (nexLunchDate) {
       let dateTarget = nexLunchDate.split(".");
-      let time = new Date().toLocaleString("ru-RU", {
+      let time = new Date();
+      time.setTime(time.getTime() + 3 * 60 * 60 * 1000);
+      let localTime = time.toLocaleString("ru-RU", {
         timezone: "Europe/Moscow",
       });
-      let currentDate = time.split(",")[0].slice(0, 5);
-      let currentTime = time.split(",")[1].trimLeft().slice(0, 5);
+      let currentDate = localTime.split(",")[0].slice(0, 5);
+      let currentTime = localTime.split(",")[1].trimLeft().slice(0, 5);
 
       const newLog = new Log({
         dateTarget: `${dateTarget[0]} ${months[+dateTarget[1] - 1]}`,
@@ -34,8 +36,12 @@ module.exports = {
         time: currentTime,
         msg: msg,
       });
+      console.log(newLog.dateTarget);
+      console.log(newLog.dateFormatted);
+      console.log(newLog.time);
+      console.log(newLog.msg);
 
-      await newLog.save().catch((err) => console.log(err));
+      // await newLog.save().catch((err) => console.log(err));
     } else {
       console.log(`\x1b[31mLogging Error\x1b[0m:`);
     }
