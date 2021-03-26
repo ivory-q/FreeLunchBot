@@ -36,12 +36,8 @@ module.exports = {
         time: currentTime,
         msg: msg,
       });
-      console.log(newLog.dateTarget);
-      console.log(newLog.dateFormatted);
-      console.log(newLog.time);
-      console.log(newLog.msg);
 
-      // await newLog.save().catch((err) => console.log(err));
+      await newLog.save().catch((err) => console.log(err));
     } else {
       console.log(`\x1b[31mLogging Error\x1b[0m:`);
     }
