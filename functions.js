@@ -3,6 +3,7 @@ const fetch = require("node-fetch");
 
 const Sub = require("./models/Sub");
 
+let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
 let months = [
   "Января",
   "Февраля",
@@ -48,17 +49,18 @@ module.exports = {
     }
   },
   GetNextLunchDate: async () => {
-    let response = await fetch("https://bincol.ru/freelunch/pin.php/", {
+    let params = new URLSearchParams();
+    params.append("secret", secret);
+
+    let response = await fetch("https://bincol.ru/freelunch/api/nextDate/", {
       method: "POST",
+      body: params,
     });
-    const body = await response.text();
-    const htmlRes = cheerio.load(body);
-    if (htmlRes(".date_lunch")) {
-      let dateTarget = htmlRes(".date_lunch")
-        .text()
-        .split(String.fromCharCode(160))[1];
-      return dateTarget;
+    const body = await response.json();
+    if (body?.date != null) {
+      return body.date;
     }
+    console.log("Api Next Lunch Error");
   },
   GetDateVerbal: (date) => {
     let dateTarget = date.split(".");

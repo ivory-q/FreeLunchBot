@@ -2,17 +2,12 @@ const {
   GetNextLunchDate,
   GetDateVerbal,
   GetDateTimeFormatted,
-  IsFreeLunchWorks,
 } = require("./functions");
 
 const Log = require("./models/Log");
 
 module.exports = {
   logger: async (msg) => {
-    if (!(await IsFreeLunchWorks())) {
-      console.log("Logger: FreeLunch is unavailable");
-      return;
-    }
     let nextLunchDate = await GetNextLunchDate();
     if (nextLunchDate) {
       let dateTarget = GetDateVerbal(nextLunchDate);

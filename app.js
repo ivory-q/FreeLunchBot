@@ -14,7 +14,6 @@ const {
   GetNextLunchDate,
   GetDateVerbal,
   GetDateTimeFormatted,
-  IsFreeLunchWorks,
 } = require("./functions");
 //Routes
 const index = require("./routes/index");
@@ -88,10 +87,6 @@ app.use(function (req, res, next) {
 });
 
 async function MainBot(typestr) {
-  if (!(await IsFreeLunchWorks())) {
-    console.log("MainBot: FreeLunch is unavailable");
-    return;
-  }
   let nextLunchDate = await GetNextLunchDate();
   if (!nextLunchDate) {
     console.log("No Next Lunch Date");
@@ -99,13 +94,15 @@ async function MainBot(typestr) {
   }
   let dateTarget = GetDateVerbal(nextLunchDate);
   let dateTime = GetDateTimeFormatted(3);
-  let isSubscribedToday =
-    (await Log.find({
-      dateTarget: dateTarget,
-      dateFormatted: dateTime.date,
-    })) != [];
+  let logsToday = await Log.find({
+    dateTarget: dateTarget,
+    dateFormatted: dateTime.date,
+  });
+  let isSubscribedToday = logsToday.length > 0;
   if (isSubscribedToday) {
-    `\x1b[33m Already Subscribed for ${dateTarget} today ${dateTime.date}\x1b[0m`;
+    console.log(
+      `\x1b[33m Already Subscribed for ${dateTarget} today ${dateTime.date}, ${dateTime.time}\x1b[0m`
+    );
     return;
   }
 
