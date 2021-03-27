@@ -1,39 +1,27 @@
-const { GetNextLunchDate } = require("./functions");
+const {
+  GetNextLunchDate,
+  GetDateVerbal,
+  GetDateTimeFormatted,
+  IsFreeLunchWorks,
+} = require("./functions");
 
 const Log = require("./models/Log");
 
-let months = [
-  "Января",
-  "Февраля",
-  "Марта",
-  "Апреля",
-  "Мая",
-  "Июня",
-  "Июля",
-  "Августа",
-  "Сентября",
-  "Октября",
-  "Ноября",
-  "Декабря",
-];
-
 module.exports = {
   logger: async (msg) => {
-    let nexLunchDate = await GetNextLunchDate();
-    if (nexLunchDate) {
-      let dateTarget = nexLunchDate.split(".");
-      let time = new Date();
-      time.setTime(time.getTime() + 3 * 60 * 60 * 1000);
-      let localTime = time.toLocaleString("ru-RU", {
-        timezone: "Europe/Moscow",
-      });
-      let currentDate = localTime.split(",")[0].slice(0, 5);
-      let currentTime = localTime.split(",")[1].trimLeft().slice(0, 5);
+    if (!(await IsFreeLunchWorks())) {
+      console.log("Logger: FreeLunch is unavailable");
+      return;
+    }
+    let nextLunchDate = await GetNextLunchDate();
+    if (nextLunchDate) {
+      let dateTarget = GetDateVerbal(nextLunchDate);
+      let dateTime = GetDateTimeFormatted(3);
 
       const newLog = new Log({
-        dateTarget: `${dateTarget[0]} ${months[+dateTarget[1] - 1]}`,
-        dateFormatted: currentDate,
-        time: currentTime,
+        dateTarget: dateTarget,
+        dateFormatted: dateTime.date,
+        time: dateTime.time,
         msg: msg,
       });
 

@@ -3,6 +3,21 @@ const fetch = require("node-fetch");
 
 const Sub = require("./models/Sub");
 
+let months = [
+  "Января",
+  "Февраля",
+  "Марта",
+  "Апреля",
+  "Мая",
+  "Июня",
+  "Июля",
+  "Августа",
+  "Сентября",
+  "Октября",
+  "Ноября",
+  "Декабря",
+];
+
 module.exports = {
   GetBotState: async (user) => {
     let res = await Sub.findOne({ username: user.username }).catch((err) =>
@@ -44,5 +59,24 @@ module.exports = {
         .split(String.fromCharCode(160))[1];
       return dateTarget;
     }
+  },
+  GetDateVerbal: (date) => {
+    let dateTarget = date.split(".");
+    dateTarget = `${dateTarget[0]} ${months[+dateTarget[1] - 1]}`;
+    return dateTarget;
+  },
+  GetDateTimeFormatted: (timezoneOffset) => {
+    let time = new Date();
+    time.setTime(time.getTime() + timezoneOffset * 60 * 60 * 1000);
+    let localTime = time.toLocaleString("ru-RU", {
+      timezone: "Europe/Moscow",
+    });
+    let currentDate = localTime.split(",")[0].slice(0, 5);
+    let currentTime = localTime.split(",")[1].trimLeft().slice(0, 5);
+    return { date: currentDate, time: currentTime };
+  },
+  IsFreeLunchWorks: async () => {
+    let response = await fetch("https://bincol.ru/freelunch/");
+    return !response.url.includes("break");
   },
 };

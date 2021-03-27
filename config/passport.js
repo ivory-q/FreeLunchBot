@@ -1,7 +1,7 @@
 const LocalStrategy = require("passport-local").Strategy;
 const cheerio = require("cheerio");
 const fetch = require("node-fetch");
-const { GetNextLunchDate } = require("../functions");
+const { GetNextLunchDate, IsFreeLunchWorks } = require("../functions");
 
 const User = require("../models/User");
 
@@ -12,6 +12,12 @@ module.exports = (passport) => {
       async (username, pin, done) => {
         let user = await User.findOne({ username: username });
         if (!user) {
+          if (!(await IsFreeLunchWorks())) {
+            console.log("Passport: FreeLunch is unavailable");
+            return done(null, false, {
+              message: "Сервис временно недоступен",
+            });
+          }
           let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
           let date = await GetNextLunchDate();
           let params = new URLSearchParams();
@@ -35,7 +41,6 @@ module.exports = (passport) => {
             }
           );
           let status = await response.json();
-
           params = new URLSearchParams();
           params.append("student_id", username);
           response = await fetch("https://bincol.ru/freelunch/pin.php/", {

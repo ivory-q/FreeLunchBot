@@ -10,7 +10,12 @@ const mongoose = require("mongoose");
 const compression = require("compression");
 const { asyncQueue } = require("./taskQueue");
 const { logger } = require("./logger");
-const { GetNextLunchDate } = require("./functions");
+const {
+  GetNextLunchDate,
+  GetDateVerbal,
+  GetDateTimeFormatted,
+  IsFreeLunchWorks,
+} = require("./functions");
 //Routes
 const index = require("./routes/index");
 const offline = require("./routes/offline");
@@ -83,17 +88,27 @@ app.use(function (req, res, next) {
 });
 
 async function MainBot(typestr) {
-  let lastSubscription = await Log.find({}).sort({ date: -1 }).limit(1);
-  if (lastSubscription.length > 0) {
-    let timeDiff = (Date.now() - lastSubscription[0].date) / 3600000;
-    console.log(
-      `\x1b[33m Last Subscription ${timeDiff.toFixed(2)}h ago\x1b[0m`
-    );
-    if (timeDiff < 2.5) {
-      return;
-    }
+  if (!(await IsFreeLunchWorks())) {
+    console.log("MainBot: FreeLunch is unavailable");
+    return;
   }
-  
+  let nextLunchDate = await GetNextLunchDate();
+  if (!nextLunchDate) {
+    console.log("No Next Lunch Date");
+    return;
+  }
+  let dateTarget = GetDateVerbal(nextLunchDate);
+  let dateTime = GetDateTimeFormatted(3);
+  let isSubscribedToday =
+    (await Log.find({
+      dateTarget: dateTarget,
+      dateFormatted: dateTime.date,
+    })) != [];
+  if (isSubscribedToday) {
+    `\x1b[33m Already Subscribed for ${dateTarget} today ${dateTime.date}\x1b[0m`;
+    return;
+  }
+
   let subs = await Sub.find({});
   if (!subs) return;
   let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
