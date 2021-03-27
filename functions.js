@@ -1,5 +1,5 @@
-const cheerio = require("cheerio");
 const fetch = require("node-fetch");
+const md5 = require("md5");
 
 const Sub = require("./models/Sub");
 
@@ -77,8 +77,45 @@ module.exports = {
     let currentTime = localTime.split(",")[1].trimLeft().slice(0, 5);
     return { date: currentDate, time: currentTime };
   },
-  IsFreeLunchWorks: async () => {
-    let response = await fetch("https://bincol.ru/freelunch/");
-    return !response.url.includes("break");
+  GetUserInformation: async (studentID, studentPIN) => {
+    let params = new URLSearchParams();
+    params.append("secret", secret);
+    params.append("studentID", studentID);
+    params.append("studentPIN", md5(studentPIN));
+
+    let response = await fetch("https://bincol.ru/freelunch/api/studentInfo/", {
+      method: "POST",
+      body: params,
+    });
+    let res = await response.json();
+    return res.name;
+  },
+  // IsFreeLunchWorks: async () => {
+  //   let response = await fetch("https://bincol.ru/freelunch/");
+  //   return !response.url.includes("break");
+  // },
+  LunchSignUp: async (studentID, date) => {
+    let params = new URLSearchParams();
+    params.append("secret", secret);
+    params.append("studentID", studentID);
+    params.append("date", date);
+
+    await fetch("https://bincol.ru/freelunch/api/register/", {
+      method: "POST",
+      body: params,
+    });
+  },
+  LunchCheck: async (studentID, date) => {
+    let params = new URLSearchParams();
+    params.append("secret", secret);
+    params.append("studentID", studentID);
+    params.append("date", date);
+
+    let response = await fetch("https://bincol.ru/freelunch/api/checkLunch/", {
+      method: "POST",
+      body: params,
+    });
+    let res = await response.json();
+    return res.status;
   },
 };

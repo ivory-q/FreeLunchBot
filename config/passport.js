@@ -1,7 +1,12 @@
 const LocalStrategy = require("passport-local").Strategy;
 const cheerio = require("cheerio");
 const fetch = require("node-fetch");
-const { GetNextLunchDate, IsFreeLunchWorks } = require("../functions");
+const {
+  GetNextLunchDate,
+  GetUserInformation,
+  LunchSignUp,
+  LunchCheck,
+} = require("../functions");
 
 const User = require("../models/User");
 
@@ -12,58 +17,21 @@ module.exports = (passport) => {
       async (username, pin, done) => {
         let user = await User.findOne({ username: username });
         if (!user) {
-          if (!(await IsFreeLunchWorks())) {
-            console.log("Passport: FreeLunch is unavailable");
-            return done(null, false, {
-              message: "Сервис временно недоступен",
-            });
-          }
-          let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
-          let date = await GetNextLunchDate();
-          let params = new URLSearchParams();
-          params.append("secret", secret);
-          params.append("studentID", username);
-          params.append("date", date);
-
-          let response = await fetch(
-            "https://bincol.ru/freelunch/api/register/",
-            {
-              method: "POST",
-              body: params,
-            }
-          );
-
-          response = await fetch(
-            "https://bincol.ru/freelunch/api/checkLunch/",
-            {
-              method: "POST",
-              body: params,
-            }
-          );
-          let status = await response.json();
-          params = new URLSearchParams();
-          params.append("student_id", username);
-          response = await fetch("https://bincol.ru/freelunch/pin.php/", {
-            method: "POST",
-            body: params,
-          });
-
-          let cookie = response.headers.raw()["set-cookie"][0].split(";")[0];
-
-          params.append("student_pin", pin);
-          response = await fetch("https://bincol.ru/freelunch/result.php/", {
-            method: "POST",
-            body: params,
-            headers: { Cookie: cookie },
-          });
-
-          const body = await response.text();
-          const htmlRes = cheerio.load(body);
+          // if (!(await IsFreeLunchWorks())) {
+          //   console.log("Passport: FreeLunch is unavailable");
+          //   return done(null, false, {
+          //     message: "Сервис временно недоступен",
+          //   });
+          // }
+          let studentName = await GetUserInformation(username, pin);
 
           try {
-            if (status.status && htmlRes(".dear_success").text()) {
+            if (studentName != "False" && studentName != null) {
+              let date = await GetNextLunchDate();
+              await LunchSignUp(username, date);
+
               const newUser = new User({
-                name: htmlRes(".dear_success").text().trim().replace(",", ""),
+                name: studentName,
                 username: username,
                 pin: pin,
                 date: Date(Date.now()),

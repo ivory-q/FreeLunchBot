@@ -11,7 +11,7 @@ module.exports = {
     let nextLunchDate = await GetNextLunchDate();
     if (nextLunchDate) {
       let dateTarget = GetDateVerbal(nextLunchDate);
-      let dateTime = GetDateTimeFormatted(3);
+      let dateTime = GetDateTimeFormatted(0);
 
       const newLog = new Log({
         dateTarget: dateTarget,

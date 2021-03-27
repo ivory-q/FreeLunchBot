@@ -14,6 +14,8 @@ const {
   GetNextLunchDate,
   GetDateVerbal,
   GetDateTimeFormatted,
+  LunchSignUp,
+  LunchCheck,
 } = require("./functions");
 //Routes
 const index = require("./routes/index");
@@ -93,7 +95,7 @@ async function MainBot(typestr) {
     return;
   }
   let dateTarget = GetDateVerbal(nextLunchDate);
-  let dateTime = GetDateTimeFormatted(3);
+  let dateTime = GetDateTimeFormatted(0);
   let logsToday = await Log.find({
     dateTarget: dateTarget,
     dateFormatted: dateTime.date,
@@ -108,32 +110,17 @@ async function MainBot(typestr) {
 
   let subs = await Sub.find({});
   if (!subs) return;
-  let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
-  let date = await GetNextLunchDate();
   let count = 1;
   let success = 0;
   console.log(`\x1b[33m====>> ${typestr} Subscription: ${subs.length}\x1b[0m`);
 
   subs.forEach((user) => {
     queue.push(async (done) => {
-      let params = new URLSearchParams();
-      params.append("secret", secret);
-      params.append("studentID", user.username);
-      params.append("date", date);
-
-      let response = await fetch("https://bincol.ru/freelunch/api/register/", {
-        method: "POST",
-        body: params,
-      });
-
-      response = await fetch("https://bincol.ru/freelunch/api/checkLunch/", {
-        method: "POST",
-        body: params,
-      });
-      let res = await response.json();
+      await LunchSignUp(user.username, nextLunchDate);
+      let status = await LunchCheck(user.username, nextLunchDate);
 
       try {
-        if (res.status) {
+        if (status) {
           console.log(`${count} \x1b[32mSuccess\x1b[0m:`, user.name);
           success++;
         } else {
