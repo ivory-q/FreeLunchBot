@@ -95,7 +95,7 @@ async function MainBot(typestr) {
     return;
   }
   let dateTarget = GetDateVerbal(nextLunchDate);
-  let dateTime = GetDateTimeFormatted(0);
+  let dateTime = GetDateTimeFormatted(3);
   let logsToday = await Log.find({
     dateTarget: dateTarget,
     dateFormatted: dateTime.date,
@@ -103,7 +103,7 @@ async function MainBot(typestr) {
   let isSubscribedToday = logsToday.length > 0;
   if (isSubscribedToday) {
     console.log(
-      `\x1b[33m Already Subscribed for ${dateTarget} today ${dateTime.date}, ${dateTime.time}\x1b[0m`
+      `\x1b[33m${dateTime.time}: Already Subscribed for ${dateTarget} today ${dateTime.date}\x1b[0m`
     );
     return;
   }
