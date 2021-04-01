@@ -3,7 +3,7 @@ const md5 = require("md5");
 
 const Sub = require("./models/Sub");
 
-let secret = "7e9c2eb131947c62ba1e51e4e265aa01";
+let secret = "Error while signing up for meal!";
 let months = [
   "Января",
   "Февраля",
@@ -94,10 +94,11 @@ module.exports = {
   //   let response = await fetch("https://bincol.ru/freelunch/");
   //   return !response.url.includes("break");
   // },
-  LunchSignUp: async (studentID, date) => {
+  LunchSignUp: async (studentID, studentPIN, date) => {
     let params = new URLSearchParams();
     params.append("secret", secret);
     params.append("studentID", studentID);
+    params.append("studentPIN", studentPIN);
     params.append("date", date);
 
     await fetch("https://bincol.ru/freelunch/api/register/", {

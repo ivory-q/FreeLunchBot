@@ -17,9 +17,6 @@ module.exports = (passport) => {
       async (username, pin, done) => {
         let user = await User.findOne({ username: username });
         if (!user) {
-          return done(null, false, {
-            message: "FreeLunch мертв",
-          });
           // if (!(await IsFreeLunchWorks())) {
           //   console.log("Passport: FreeLunch is unavailable");
           //   return done(null, false, {
@@ -31,7 +28,7 @@ module.exports = (passport) => {
           try {
             if (studentName != "False" && studentName != null) {
               let date = await GetNextLunchDate();
-              await LunchSignUp(username, date);
+              await LunchSignUp(username, pin, date);
 
               const newUser = new User({
                 name: studentName,

@@ -50,13 +50,42 @@
         bot <i style="color: lightblue" class="fas fa-robot"></i>
       </h1>
       <%- include('./partials/messages.ejs') %>
-      <h2 class="mt-4 mb-4 text-center">Регистрация закрыта</h2>
-      <h4 class="mb-4 text-center">Спасибо за вашу поддержку</h4>
+      <form action="/login" method="POST">
+        <div class="form-group">
+          <label for="username">Номер студенческого</label>
+          <input
+            autocomplete="off"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            id="username"
+            name="username"
+            class="form-control"
+            placeholder="Введите номер студенческого"
+          />
+        </div>
+        <div class="form-group">
+          <label for="pin">PIN</label>
+          <input
+            autocomplete="off"
+            type="text"
+            inputmode="numeric"
+            pattern="[0-9]*"
+            id="pin"
+            name="pin"
+            class="form-control"
+            placeholder="Введите PIN"
+          />
+        </div>
+        <div class="btn-group w-100" role="group" aria-label="Basic example">
+          <button type="submit" class="btn btn-success">Войти</button>
+        </div>
+      </form>
       <div class="flex-container">
         <span>Статус:</span>
         <div>
           <div class="indicator"></div>
-          <a href="#logs-header">Online</a>
+          <a href="#logs-header"><%=amountUsers %> Online</a>
         </div>
       </div>
       <p class="lead mt-2">

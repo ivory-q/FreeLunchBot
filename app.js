@@ -45,7 +45,7 @@ const queue = asyncQueue((concurrency = 20));
 mongoose
   .connect(db, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => console.log("MongoDB connected..."))
-  // .then(MainBot("Immediate"))
+  .then(MainBot("Immediate"))
   .catch((err) => console.log(err));
 
 app.use(favicon(path.join(__dirname, "views", "icons", "favicon.ico")));
@@ -79,11 +79,11 @@ app.use((req, res, next) => {
 //Routes
 app.use("/", index);
 app.use("/offline", offline);
-app.use("/dashboard", dashboard);
+// app.use("/dashboard", dashboard);
 app.use("/login", login);
-app.use("/logout", logout);
-app.use("/delete", deleteUsr);
-app.use("/bot", bot);
+// app.use("/logout", logout);
+// app.use("/delete", deleteUsr);
+// app.use("/bot", bot);
 app.use(function (req, res, next) {
   res.status(404).render("404");
 });
@@ -116,7 +116,7 @@ async function MainBot(typestr) {
 
   subs.forEach((user) => {
     queue.push(async (done) => {
-      await LunchSignUp(user.username, nextLunchDate);
+      await LunchSignUp(user.username, user.pin, nextLunchDate);
       let status = await LunchCheck(user.username, nextLunchDate);
 
       try {
