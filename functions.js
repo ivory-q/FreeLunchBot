@@ -81,7 +81,7 @@ module.exports = {
     let params = new URLSearchParams();
     params.append("secret", secret);
     params.append("studentID", studentID);
-    params.append("studentPIN", md5(studentPIN));
+    params.append("studentPIN", studentPIN);
 
     let response = await fetch("https://bincol.ru/freelunch/api/studentInfo/", {
       method: "POST",

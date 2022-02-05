@@ -79,9 +79,9 @@ app.use((req, res, next) => {
 //Routes
 app.use("/", index);
 app.use("/offline", offline);
-// app.use("/dashboard", dashboard);
+app.use("/dashboard", dashboard);
 app.use("/login", login);
-// app.use("/logout", logout);
+app.use("/logout", logout);
 // app.use("/delete", deleteUsr);
 // app.use("/bot", bot);
 app.use(function (req, res, next) {
